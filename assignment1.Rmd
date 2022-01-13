@@ -1,0 +1,98 @@
+---
+title: "EDS241: Assignment 1"
+author: "Jake Eisaguirre"
+date: '`r format(Sys.time(), "%m/%d/%Y")`'
+output: 
+  pdf_document:
+    toc: false
+    number_sections: yes
+header-includes:
+  - \setlength{\parindent}{1em}
+  - \usepackage{float}
+--- 
+``` {r setup, echo = FALSE, message = FALSE, warning = FALSE}
+
+# set default chunk options
+knitr::opts_chunk$set(fig.width = 4, fig.height = 3, 
+                      echo = TRUE, message = FALSE, warning = FALSE)
+
+library(readxl)
+library(here)
+library(tidyverse)
+library(janitor)
+library(estimatr)
+library(car)
+
+```
+#### Read in, inspect data, and wrangle
+```{r}
+data <- read_excel(here("data","CES4.xlsx"))
+
+clean_data <- data %>% 
+  as.data.frame() %>% 
+  select(`Census Tract`, `Total Population`, `Low Birth Weight`, PM2.5, Poverty) %>% 
+  na.omit() %>% 
+  clean_names() %>% 
+  filter(!str_detect(low_birth_weight, "NA"))
+  
+
+
+```
+
+#### (a) What is the average concentration of PM2.5 across all census tracts in California?
+```{r}
+print(mean(clean_data$pm2_5))
+```
+The average concentration of PM2.5 across all census tracts in California is 10.15 micrograms per cubic meters
+
+#### (b) What county has the highest level of poverty in California?
+```{r}
+clean_data[which(clean_data$poverty == max(clean_data$poverty)), ]
+```
+The county that has the highest level of poverty in California is census_tract: 6037206300
+
+#### (c) Make a histogram depicting the distribution of percent low birth weight and PM2.5
+```{r}
+ggplot(data = clean_data, aes(x = as.numeric(low_birth_weight))) +
+  geom_histogram() +
+  theme_classic() +
+  xlab("low_birth_weight")
+
+
+ggplot(data = clean_data, aes(x = pm2_5)) +
+  geom_histogram() +
+  theme_classic()
+```
+#### (d) Estimate a OLS regression of LowBirthWeight on PM25. Report the estimated slope coefficient and its heteroskedasticity-robust standard error. Interpret the estimated slope coefficient. Is the effect of PM25 on LowBirthWeight statistically significant at the 5%?
+```{r}
+
+model_1 <- lm_robust(low_birth_weight ~ pm2_5, data = clean_data)
+summary(model_1)
+
+```
+The estimated slope coefficient is 0.1182 and its heteroskedasticity-robust standard error is 0.008401. 
+
+Slope interpretation: For every one unit increase in PM2.5 we see an 0.1182 percent increase in census tract birth weights less than 2500g. 
+
+Yes the effect of PM2.5 on low birth weights is statistically significant at the 5% level since the p-values is extremely small (2.179e-44). 
+
+#### (e) Suppose a new air quality policy is expected to reduce PM2.5 concentration by 2 micrograms per cubic meters. Predict the new average value of LowBirthWeight and derive its 95% confidence interval. Interpret the 95% confidence interval.
+```{r}
+
+```
+
+#### (f) Add the variable Poverty as an explanatory variable to the regression in (d). Interpret the estimated coefficient on Poverty. What happens to the estimated coefficient on PM25, compared to the regression in (d). Explain.
+```{r}
+model_2 <- lm_robust(low_birth_weight ~ pm2_5 + poverty, data = clean_data)
+summary(model_2)
+
+```
+Poverty coefficient Interpretation: When PM2.5 is held fixed, a one unit increase in poverty will result in a 0.02744 percent increase in census tract birth weights less than 2500g.
+
+The coefficient of PM2.5 in this model compared to the previous model seems to have decreased by 50%. This happens most likely due to the two predictor variables being some what correlated. 
+
+#### (g) From the regression in (f), test the null hypothesis that the effect of PM2.5 is equal to the effect of Poverty
+```{r}
+linearHypothesis(model_2, c("pm2_5=0", "poverty=0"), white.adjust = "hc2")
+```
+We reject the null hypothesis that the effect of PM2.5 is equal to the effect of Poverty
