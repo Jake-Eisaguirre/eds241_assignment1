@@ -78,8 +78,14 @@ Yes the effect of PM2.5 on low birth weights is statistically significant at the
 
 #### (e) Suppose a new air quality policy is expected to reduce PM2.5 concentration by 2 micrograms per cubic meters. Predict the new average value of LowBirthWeight and derive its 95% confidence interval. Interpret the 95% confidence interval.
 ```{r}
+new_average <- (0.1182*(2) + 3.7996)
+print(new_average)
 
+lbw <- as.numeric(clean_data$low_birth_weight)
+CI_pos <- mean(lbw) + 1.96 * (sd(lbw)/sqrt(7805))
+CI_neg <- mean(lbw) - 1.96 * (sd(lbw)/sqrt(7805))
 ```
+The new average value of birth weights less than 2500g is 4.036%. We 95% confident that the population of baby birth weights less than 2500g is between 4.969% and 5.039%. 
 
 #### (f) Add the variable Poverty as an explanatory variable to the regression in (d). Interpret the estimated coefficient on Poverty. What happens to the estimated coefficient on PM25, compared to the regression in (d). Explain.
 ```{r}
@@ -89,7 +95,7 @@ summary(model_2)
 ```
 Poverty coefficient Interpretation: When PM2.5 is held fixed, a one unit increase in poverty will result in a 0.02744 percent increase in census tract birth weights less than 2500g.
 
-The coefficient of PM2.5 in this model compared to the previous model seems to have decreased by 50%. This happens most likely due to the two predictor variables being some what correlated. 
+The coefficient of PM2.5 in this model compared to the previous model seems to have decreased by 50%. This happens most likely due to the two predictor variables being some what correlated or having co-linearity. The model is unsure what variable is explaining the variance. 
 
 #### (g) From the regression in (f), test the null hypothesis that the effect of PM2.5 is equal to the effect of Poverty
 ```{r}
