@@ -31,7 +31,7 @@ data <- read_excel(here("data","CES4.xlsx"))
 
 clean_data <- data %>% 
   as.data.frame() %>% 
-  select(`Census Tract`, `Total Population`, `Low Birth Weight`, PM2.5, Poverty) %>% 
+  select(`Census Tract`, `Total Population`, `Low Birth Weight`, PM2.5, Poverty, `California County`) %>% 
   na.omit() %>% 
   clean_names() %>% 
   filter(!str_detect(low_birth_weight, "NA"))
@@ -52,7 +52,7 @@ The average concentration of PM2.5 across all census tracts in California is 10.
 ```{r}
 clean_data[which(clean_data$poverty == max(clean_data$poverty)), ]
 ```
-The county that has the highest level of poverty in California is census_tract: 6037206300
+The county that has the highest level of poverty in California is Los Angeles County/ Censes tract 6037206300
 
 
 \noindent(c) Make a histogram depicting the distribution of percent low birth weight and PM2.5
@@ -101,7 +101,7 @@ The new average value of birth weights less than 2500g is 4.154% with a decrease
 model_2 <- lm_robust(low_birth_weight ~ pm2_5 + poverty, data = clean_data)
 summary(model_2)
 
-cor(clean_data$pm2_5, clean_data$poverty)
+
 ```
 Poverty coefficient Interpretation: When PM2.5 is held fixed, a one unit increase in poverty will result in a 0.02744 percent increase in census tract birth weights less than 2500g.
 
